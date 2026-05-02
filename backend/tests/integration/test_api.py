@@ -1,4 +1,5 @@
 def test_create_and_get_note(client):
+    """Creating a note returns 201, then the note can be fetched by ID."""
     response = client.post("/api/notes/", json={"title": "Integration Note", "content": "Content"})
     assert response.status_code == 201
     note = response.json()
@@ -10,6 +11,7 @@ def test_create_and_get_note(client):
 
 
 def test_list_notes(client):
+    """All created notes appear in the list endpoint."""
     client.post("/api/notes/", json={"title": "Note 1", "content": ""})
     client.post("/api/notes/", json={"title": "Note 2", "content": ""})
     response = client.get("/api/notes/")
@@ -18,6 +20,7 @@ def test_list_notes(client):
 
 
 def test_update_note(client):
+    """PATCH updates the note title and returns the updated resource."""
     response = client.post("/api/notes/", json={"title": "Old", "content": ""})
     note_id = response.json()["id"]
     response = client.patch(f"/api/notes/{note_id}", json={"title": "New"})
@@ -26,6 +29,7 @@ def test_update_note(client):
 
 
 def test_delete_note_returns_204(client):
+    """Deleting a note returns 204, and fetching it afterwards returns 404."""
     response = client.post("/api/notes/", json={"title": "Delete Me", "content": ""})
     note_id = response.json()["id"]
     assert client.delete(f"/api/notes/{note_id}").status_code == 204
@@ -33,6 +37,7 @@ def test_delete_note_returns_204(client):
 
 
 def test_create_and_list_tasks(client):
+    """All created tasks appear in the list endpoint."""
     client.post("/api/tasks/", json={"title": "Task A"})
     client.post("/api/tasks/", json={"title": "Task B", "is_focus": True})
     response = client.get("/api/tasks/")
@@ -41,6 +46,7 @@ def test_create_and_list_tasks(client):
 
 
 def test_focus_tasks_endpoint(client):
+    """GET /tasks/focus returns only tasks with is_focus=True and not completed."""
     client.post("/api/tasks/", json={"title": "Not focus"})
     client.post("/api/tasks/", json={"title": "Focus task", "is_focus": True})
     response = client.get("/api/tasks/focus")
@@ -51,6 +57,7 @@ def test_focus_tasks_endpoint(client):
 
 
 def test_settings_upsert_and_list(client):
+    """Upserting a key twice results in a single entry with the latest value."""
     client.put("/api/settings/username", json={"value": "Marc"})
     client.put("/api/settings/username", json={"value": "Bob"})
     response = client.get("/api/settings/")
@@ -59,6 +66,7 @@ def test_settings_upsert_and_list(client):
 
 
 def test_create_folder_and_note_in_folder(client):
+    """A note can be created inside a folder and its folder_id is persisted."""
     folder_resp = client.post("/api/folders/", json={"name": "Work"})
     assert folder_resp.status_code == 201
     folder_id = folder_resp.json()["id"]

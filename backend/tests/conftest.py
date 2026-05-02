@@ -1,19 +1,25 @@
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 from fastapi.testclient import TestClient
-from app.main import app
 from app.core.database import Base, get_db
-import app.models  # noqa: F401
+from app.main import app as fastapi_app
 
-SQLITE_URL = "sqlite://"
-
-engine = create_engine(SQLITE_URL, connect_args={"check_same_thread": False})
+# StaticPool forces all connections to share the same in-memory SQLite instance,
+# which is required for TestClient (which opens its own connection) to see the
+# tables created by the db fixture.
+engine = create_engine(
+    "sqlite://",
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
+)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 @pytest.fixture
 def db():
+    """Provide a fresh SQLite session for each test, tables created and dropped around it."""
     Base.metadata.create_all(bind=engine)
     session = TestingSessionLocal()
     try:
@@ -25,10 +31,11 @@ def db():
 
 @pytest.fixture
 def client(db):
+    """Provide a TestClient wired to the test database session."""
     def override_get_db():
         yield db
 
-    app.dependency_overrides[get_db] = override_get_db
-    with TestClient(app) as c:
+    fastapi_app.dependency_overrides[get_db] = override_get_db
+    with TestClient(fastapi_app) as c:
         yield c
-    app.dependency_overrides.clear()
+    fastapi_app.dependency_overrides.clear()
