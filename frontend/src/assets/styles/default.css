@@ -1,0 +1,44 @@
+/* CSS reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Dark theme — single source of truth for all colors */
+:root {
+  /* Backgrounds */
+  --color-bg-primary: #1a1a2e;
+  --color-bg-secondary: #16213e;
+  --color-bg-tertiary: #0f3460;
+
+  /* Text */
+  --color-text-primary: #eaeaea;
+  --color-text-secondary: #a0a0a0;
+  --color-text-muted: #6c6c6c;
+
+  /* Accents */
+  --color-accent-primary: #e94560;
+  --color-accent-secondary: #533483;
+
+  /* State colors */
+  --color-success: #4ade80;
+  --color-warning: #fbbf24;
+  --color-error: #ef4444;
+
+  /* Component-specific */
+  --color-button-bg: #e94560;
+  --color-button-text: #ffffff;
+  --color-input-bg: #16213e;
+  --color-input-border: #0f3460;
+  --color-panel-ia-bg: #1a1a2e;
+}
+
+body {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
